@@ -1,0 +1,14 @@
+.git
+.DS_Store
+*.log
+.gitignore
+.eslintrc.json
+.eslintignore
+.eslintrc
+.sql
+*.pem
+*.pfx
+*.cer
+
+.env
+node_modules/

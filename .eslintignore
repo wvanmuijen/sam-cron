@@ -1,6 +1,1 @@
-node_modules
-validations/
-models/
-api/socket
-api/lib
-ecosystem.config.js
+./node_modules/**

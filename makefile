@@ -1,12 +1,15 @@
-# SHELL := /bin/bash
-PATH := node_modules/.bin:$(PATH)
+#!/bin/bash
 
-JS_SRC= $(shell git diff --staged --name-only -- '*.js')
+export PATH := node_modules/.bin/:$(PATH)
 
-.PHONY: lint build
-
+all:
+	./node_modules/.bin/eslint .
+all_fix:
+	./node_modules/.bin/eslint . --fix
 lint:
-	if [ -z $(JS_SRC)]; then echo "No JS files staged"; else eslint ${JS_SRC} ${ESLINT_ARGS}; fi;
+	$(eval files = $(shell git diff --staged --name-only -- "*.js"))
+	if [ -z $(files) ]; then echo 'No staged files found'; else eslint $(files); fi
 
 lint_fix:
-	if [ -z $(JS_SRC)]; then echo "No JS files staged"; else eslint --fix ${JS_SRC}; fi;
+	$(eval files = $(shell git diff --staged --name-only -- "*.js"))
+	if [ -z $(files) ]; then echo 'No staged files found'; else eslint $(files) --fix; git add $(files); fi

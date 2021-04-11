@@ -19,6 +19,7 @@
   "homepage": "https://github.com/malik106/sam-cron#readme",
   "dependencies": {
     "aws-sdk": "^2.870.0",
+    "bluebird": "^3.7.2",
     "dotenv": "^8.2.0",
     "knex": "^0.95.2",
     "node-cron": "^3.0.0",

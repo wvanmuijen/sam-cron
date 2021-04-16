@@ -9,7 +9,10 @@ const params = {
   QueueUrl: process.env.SQS_QUEUE_URL,
 };
 
-const sendSQSMessage = () => new Promise((resolve, reject) => {
+const sendSQSMessage = (getCompanyIds) => new Promise((resolve, reject) => {
+  if(getCompanyIds){
+    params.MessageBody = getCompanyIds
+  }
   sqs.sendMessage(params, (err, data) => {
     if (err) {
       return reject(err);

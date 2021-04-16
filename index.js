@@ -6,11 +6,71 @@ const sqsService = require('./app/services/sqsSendMessage');
 
 const cron = require('node-cron');
 
-const sampleCronFunc = () => {
-  const usersQuery = databaseProvider
-    .knex('users')
-    .select('id');
+const Promise = require('bluebird');
 
+const limit = 10;
+const offset = 0;
+
+/**
+ * send Reminders To Companies
+ */
+exports.sendRemindersToCompanies = async (limit, offset) => {
+  try {
+
+    // get getCompanies
+    let fetchCompany = await getCompanies(limit, offset);
+
+    if (fetchCompany.rows && fetchCompany.rows.length > 0) {
+      return Promise.mapSeries(fetchCompany.rows, async function (item, key) {
+        let obj = { companyId: item.id }
+        return sqsService.sendSQSMessage(JSON.stringify(obj))
+          .then((sqsRes) => {
+            console.log('Success: ', sqsRes.MessageId);
+            return sqsRes.MessageId
+          })
+          .catch((err) => {
+            console.log('Sqs service Error: ', err);
+          });
+      }).then(function(result) {
+        // This will run after the last step is done
+        console.log("Done!" ,result);
+        return module.exports.sendRemindersToCompanies(limit, offset + limit);
+      });
+    }
+
+  } catch (error) {
+    console.log('error', error);
+  }
+}
+
+const getCompanies = (limit, offset) => new Promise((resolve, reject) => {
+  
+  const companyQuery = databaseProvider
+    .knex('companies')
+    .select('id')
+    .limit(limit)
+    .offset(offset);
+
+  return resolve(databaseProvider.executeQuery(companyQuery));  
+
+});
+
+if (process.env.CRON_VALUE) {
+  cron.schedule(process.env.CRON_VALUE, () => {
+    exports.sendRemindersToCompanies(limit, offset);
+  });
+}else{
+  exports.sendRemindersToCompanies(limit, offset);
+}
+
+
+
+
+/*const sampleCronFunc = () => {
+  const usersQuery = databaseProvider
+  .knex('users')
+  .select('id');
+  
   return databaseProvider.executeQuery(usersQuery);
 };
 
@@ -45,5 +105,5 @@ if (process.env.CRON_VALUE) {
     .catch((error) => {
       console.log(error)
     });
-}
+}*/
 
